@@ -3,3 +3,5 @@
 *.h5ad
 *.rds
 *.RDS
+.ipynb_checkpoints/
+.virtual_documents/
