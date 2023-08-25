@@ -224,8 +224,8 @@ def train_cluster(self):
             
             
         #db_loss_curr = 0
-        print("Epoch : [%d] ,  a_loss = %.4f, d_loss: %.4f ,  g_loss: %.4f,  db_loss: %.4f" 
-              % (ep, a_loss_curr, d_loss_curr, g_loss_curr,db_loss_curr))
+        print("Epoch : [%d] ,  a_loss = %.4f, d_loss: %.4f ,  db_loss: %.4f" 
+              % (ep, a_loss_curr, d2_loss_curr, db_loss_curr))
         
         
         self._is_train = False # enables false after 1st iterations only...to make training process fast
@@ -245,8 +245,8 @@ def train_cluster(self):
         #d2_loss_epoch.append(d2_loss_curr)
         db_loss_epoch.append(db_loss_curr)
         
-        if (ep % 50 == 0):
-            self.eval_cluster_on_test_(ep)
+        #if (ep % 50 == 0):
+        #    self.eval_cluster_on_test_(ep)
 
     self.eval_cluster_on_test(ep)
 
