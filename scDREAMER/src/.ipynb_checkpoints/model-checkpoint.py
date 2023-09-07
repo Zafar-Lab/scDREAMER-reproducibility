@@ -37,7 +37,7 @@ def build_model(self):
     self.expression = self.x_input               
     self.proj = tf.placeholder(dtype=tf.float32, shape=[None, self.X_dim], name='projection')
   
-    log_library_size = np.log(np.sum(self.data_train, axis=1)) 
+    log_library_size = np.log(np.sum(self.data_train, axis=1)+1) 
     mean, variance = np.mean(log_library_size), np.var(log_library_size)
 
     library_size_mean = mean
@@ -224,8 +224,8 @@ def train_cluster(self):
             
             
         #db_loss_curr = 0
-        print("Epoch : [%d] ,  a_loss = %.4f, d_loss: %.4f ,  g_loss: %.4f,  db_loss: %.4f" 
-              % (ep, a_loss_curr, d_loss_curr, g_loss_curr,db_loss_curr))
+        print("Epoch : [%d] ,  a_loss = %.4f, d_loss: %.4f ,  db_loss: %.4f" 
+              % (ep, a_loss_curr, d2_loss_curr, db_loss_curr))
         
         
         self._is_train = False # enables false after 1st iterations only...to make training process fast
@@ -245,12 +245,11 @@ def train_cluster(self):
         #d2_loss_epoch.append(d2_loss_curr)
         db_loss_epoch.append(db_loss_curr)
         
-        if (ep % 50 == 0):
-            self.eval_cluster_on_test_(ep)
+        #if (ep % 50 == 0):
+        #    self.eval_cluster_on_test_(ep)
 
     self.eval_cluster_on_test(ep)
 
-    
 
 # reuse = False
 
@@ -487,7 +486,7 @@ class scDREAMER(object):
                  checkpoint_dir='checkpoint', sample_dir='samples', result_dir = 'result', 
                  num_layers = 1, g_h_dim = [512, 256, 0, 0], d_h_dim = [512, 256, 0, 0], 
                  gen_activation = 'sig', leak = 0.2, keep_param = 0.9, trans = 'sparse',
-                 is_bn = False, g_iter = 2, lam=1.0, sampler = 'normal', shuffle_type = 1):    
+                 is_bn = False, g_iter = 2, lam=1.0, sampler = 'normal', shuffle_type = 1, sparseIP = 0):    
         
         self.sess = sess
         self.epoch = epoch
@@ -520,13 +519,21 @@ class scDREAMER(object):
         self.cell_type = cell_type
         self.name = name
         self.shuffle_type = shuffle_type
+        self.sparseIP = sparseIP
         
         if self.trans == 'sparse':
-            self.data_train, self.data_test, self.scale, self.labels_train, self.labels_test, self.batch_train, self.batch_test, self.batch_info = load_gene_mtx(self.dataset_name, transform=False, count=False, actv=self.gen_activation, batch = self.batch, cell_type = self.cell_type, name = self.name)
+            
+            self.data_train, self.data_test, self.scale, self.labels_train, self.labels_test, \
+            self.batch_train, self.batch_test, self.batch_info = load_gene_mtx(self.dataset_name, \
+            transform=False, count=False, actv=self.gen_activation, batch = self.batch, \
+            cell_type = self.cell_type, name = self.name, sparseIP = self.sparseIP)
+            
             self.N_batch = self.batch_train.shape[1]
+            
         else:
             self.data_train, self.data_test, self.labels_train, self.labels_val, self.labels_test  = load_gene_mtx(self.dataset_name, transform=True, batch = self.batch, cell_type = self.cell_type, name = self.name)
             self.scale = 1.0
+            
         """   
         if self.trans == 'sparse':
             self.data_train, self.data_test, self.scale, self.labels_train, self.labels_test, self.batch_train, self.batch_test, self.batch_info = load_gene_mtx(self.dataset_name, transform=False, count=False, actv=self.gen_activation)
@@ -534,7 +541,8 @@ class scDREAMER(object):
         else:
             self.data_train, self.data_test, self.labels_train, self.labels_val, self.labels_test  = load_gene_mtx(self.dataset_name, transform=True)
             self.scale = 1.0
-        """        
+        """     
+        
         if self.gen_activation == 'tanh':
             self.data = 2* self.data - 1
             self.data_train = 2 * self.data_train - 1
@@ -602,8 +610,3 @@ class scDREAMER(object):
             sample = tf.random_normal(tf.shape(mean), mean, tf.sqrt(variance))
             sample.set_shape(mean.get_shape())
             return sample
-
-
-
-        
-

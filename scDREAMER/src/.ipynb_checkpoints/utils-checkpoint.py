@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics.cluster import normalized_mutual_info_score as nmi
 
-def read_h5ad(data_path, batch, cell_type, name, hvg=2000):
+def read_h5ad(data_path, batch, cell_type, name, sparseIP, hvg=2000):
     print('updated hvg')
     Ann = sc.read_h5ad(data_path)
     Ann.layers["counts"] = Ann.X.copy()
@@ -27,7 +27,7 @@ def read_h5ad(data_path, batch, cell_type, name, hvg=2000):
         batch_key=batch,
         subset=True)
   
-    if (name == "Lung" or name == "Human_Mouse" or name == "Healthy_Heart"):
+    if (sparseIP == 1):
         df_final = pd.DataFrame.sparse.from_spmatrix(Ann.X) # Lung, Simulation1, Simulation 2
     else:
         df_final = pd.DataFrame(Ann.X) # Immune , Pan, Healthy Heart
@@ -103,11 +103,12 @@ def dense(x, inp_dim, out_dim, name = 'dense'):
         out = tf.add(tf.matmul(x, weights), bias, name='matmul')
         return out
 
-def load_gene_mtx(dataset_name, name, transform = True, count = True, actv = 'sig', batch = "batch", cell_type = "cell_type"):
+def load_gene_mtx(dataset_name, name, transform = True, count = True, actv = 'sig', batch = "batch", \
+                  cell_type = "cell_type", sparseIP = 0):
     print('came in load_gene')
     #B = "tech"
     #C = "celltype"
-    data, labels, batch_info_enc, batch_info = read_h5ad(dataset_name, batch, cell_type, name)
+    data, labels, batch_info_enc, batch_info = read_h5ad(dataset_name, batch, cell_type, name, sparseIP)
          
     if count == False:
         data = np.log2(data + 1) #np.ones(data.shape[0], data.shape[1]))
