@@ -500,12 +500,12 @@ def compute_simpson_index_graph(
 
     # read distances and indices with nan value handling
     indices = pd.read_csv(input_path + '_indices_' + str(chunk_no) + '.txt',
-                          header=None, sep='\n')
+                          header=None, sep='\x01', engine='python')
     indices = indices[0].str.split(',', expand=True)
     indices.set_index(keys=0, drop=True, inplace=True)  # move cell index to DF index
     indices = indices.T
     distances = pd.read_csv(input_path + '_distances_' + str(chunk_no) + '.txt',
-                            header=None, sep='\n')
+                            header=None, sep='\x01', engine='python')
     distances = distances[0].str.split(',', expand=True)
     distances.set_index(keys=0, drop=True, inplace=True)  # move cell index to DF index
     distances = distances.T
